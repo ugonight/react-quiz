@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
 import {
   Container,
@@ -6,15 +6,14 @@ import {
   ToggleButton,
   Button
 } from "react-bootstrap";
+import fs from "fs";
 
 function Question(props) {
   return <div className="question">{props.value}</div>;
 }
 
 function Choices(props) {
-  // const [radioValue, setRadioValue] = useState("0");
-
-  const choiceList = ["選択肢1", "選択肢2", "選択肢3"];
+  const choiceList = props.value; // ["選択肢1", "選択肢2", "選択肢3"];
 
   return (
     <ToggleButtonGroup
@@ -56,11 +55,20 @@ class Game extends React.Component {
   }
 
   render() {
+    var file_json = JSON.parse(
+      fs.readFileSync("./src/question01.json", "utf8")
+    );
+
     return (
       <>
-        <Question value="問題" />
+        <h1 className="header">{file_json.section}</h1>
 
-        <Choices onChange={(i) => this.changeInput(i)} />
+        <Question value={file_json.questions[0].question} />
+
+        <Choices
+          value={file_json.questions[0].choices}
+          onChange={(i) => this.changeInput(i)}
+        />
 
         <Button
           variant="primary"
