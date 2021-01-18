@@ -5,7 +5,8 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Button,
-  Alert
+  Alert,
+  Collapse
 } from "react-bootstrap";
 
 function Question(props) {
@@ -17,20 +18,31 @@ function Choices(props) {
 
   return (
     <ToggleButtonGroup type="radio" name="options" vertical className="choices">
-      {choiceList.map((choice, idx) => (
-        <ToggleButton
-          key={idx}
-          variant="outline-dark"
-          className="choice mt-2"
-          name="radio"
-          value={idx}
-          // checked={radioValue === idx}
-          onChange={(e) => props.onChange(e.currentTarget.value)}
-          disabled={props.disabled}
-        >
-          {choice}
-        </ToggleButton>
-      ))}
+      {choiceList.map((choice, idx) => {
+        var variant = "outline-dark";
+        if (props.isAnswered) {
+          if (idx.toString() === props.answer) {
+            variant = "success";
+          } else if (idx.toString() === props.input) {
+            variant = "danger";
+          }
+        }
+
+        return (
+          <ToggleButton
+            key={idx}
+            variant={variant}
+            className="choice mt-2"
+            name="radio"
+            value={idx}
+            // checked={radioValue === idx}
+            onChange={(e) => props.onChange(e.currentTarget.value)}
+            disabled={props.isAnswered}
+          >
+            {choice}
+          </ToggleButton>
+        );
+      })}
     </ToggleButtonGroup>
   );
 }
@@ -41,7 +53,7 @@ function Result(props) {
 
   return (
     <>
-      <Alert variant={variant}>
+      <Alert variant={variant} show={props.show} transition={Collapse}>
         <Alert.Heading>{headMsg}</Alert.Heading>
         <hr />
         <p className="mb-0">{props.commentary}</p>
@@ -77,15 +89,16 @@ class Game extends React.Component {
         <Choices
           value={file_json.questions[0].choices}
           onChange={(i) => this.changeInput(i)}
-          disabled={this.state.isAnswered}
+          isAnswered={this.state.isAnswered}
+          input={this.state.input}
+          answer={file_json.questions[0].answer}
         />
 
-        {this.state.isAnswered && (
-          <Result
-            isCorrect={this.state.input === file_json.questions[0].answer}
-            commentary={file_json.questions[0].commentary}
-          />
-        )}
+        <Result
+          isCorrect={this.state.input === file_json.questions[0].answer}
+          commentary={file_json.questions[0].commentary}
+          show={this.state.isAnswered}
+        />
 
         <Button
           variant="primary"
