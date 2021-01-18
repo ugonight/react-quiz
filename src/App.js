@@ -17,13 +17,21 @@ function Choices(props) {
   const choiceList = props.value;
 
   return (
-    <ToggleButtonGroup type="radio" name="options" vertical className="choices">
+    <ToggleButtonGroup
+      type="radio"
+      name="options"
+      vertical
+      className="choices"
+      value={props.input}
+      onChange={props.onChange}
+    >
       {choiceList.map((choice, idx) => {
         var variant = "outline-dark";
+        // 回答後ならボタンの色を変える
         if (props.isAnswered) {
-          if (idx.toString() === props.answer) {
+          if (idx === props.answer) {
             variant = "success";
-          } else if (idx.toString() === props.input) {
+          } else if (idx === props.input) {
             variant = "danger";
           }
         }
@@ -35,8 +43,6 @@ function Choices(props) {
             className="choice mt-2"
             name="radio"
             value={idx}
-            // checked={radioValue === idx}
-            onChange={(e) => props.onChange(e.currentTarget.value)}
             disabled={props.isAnswered}
           >
             {choice}
@@ -67,8 +73,11 @@ class Game extends React.Component {
     super(props);
     this.state = {
       input: null,
-      isAnswered: false
+      isAnswered: false,
+      isCorrect: false
     };
+    this.file_json = require("./question01.json");
+    this.question = this.file_json.questions[0];
   }
 
   changeInput(i) {
@@ -77,26 +86,37 @@ class Game extends React.Component {
     });
   }
 
-  render() {
-    var file_json = require("./question01.json");
+  clickOK(e) {
+    if (!this.state.isAnswered) {
+      // 答え合わせ
+      this.setState({
+        isAnswered: true,
+        isCorrect: this.state.input === this.question.answer
+      });
+    } else {
+      // 次の問題へ
+      this.setState({ input: null, isAnswered: false });
+    }
+  }
 
+  render() {
     return (
       <>
-        <h1 className="header">{file_json.section}</h1>
+        <h1 className="header">{this.file_json.section}</h1>
 
-        <Question value={file_json.questions[0].question} />
+        <Question value={this.question.sentence} />
 
         <Choices
-          value={file_json.questions[0].choices}
+          value={this.question.choices}
           onChange={(i) => this.changeInput(i)}
           isAnswered={this.state.isAnswered}
           input={this.state.input}
-          answer={file_json.questions[0].answer}
+          answer={this.question.answer}
         />
 
         <Result
-          isCorrect={this.state.input === file_json.questions[0].answer}
-          commentary={file_json.questions[0].commentary}
+          isCorrect={this.state.isCorrect}
+          commentary={this.question.commentary}
           show={this.state.isAnswered}
         />
 
@@ -105,10 +125,10 @@ class Game extends React.Component {
           size="lg"
           block
           className="mt-4"
-          onClick={(i) => this.setState({ isAnswered: true })}
+          onClick={(i) => this.clickOK(i)}
           disabled={this.state.input == null}
         >
-          決定
+          {this.state.isAnswered ? "次へ" : "決定"}
         </Button>
       </>
     );

@@ -2,9 +2,9 @@
   "section": "exsample",
   "questions": [
     {
-      "question": "1 + 1 = ?",
+      "sentence": "1 + 1 = ?",
       "choices": ["1", "2", "3"],
-      "answer": "1",
+      "answer": 1,
       "commentary": "常識やから…（笑）"
     }
   ]
