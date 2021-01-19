@@ -18,7 +18,7 @@ function Choices(props) {
 
   return (
     <ToggleButtonGroup
-      type="radio"
+      type={props.type}
       name="options"
       vertical
       className="choices"
@@ -29,10 +29,18 @@ function Choices(props) {
         var variant = "outline-dark";
         // 回答後ならボタンの色を変える
         if (props.isAnswered) {
-          if (idx === props.answer) {
-            variant = "success";
-          } else if (idx === props.input) {
-            variant = "danger";
+          if (props.type === "radio") {
+            if (idx === props.answer) {
+              variant = "success";
+            } else if (idx === props.input) {
+              variant = "danger";
+            }
+          } else if (props.type === "checkbox") {
+            if (props.answer.includes(idx)) {
+              variant = "success";
+            } else if (props.input.includes(idx)) {
+              variant = "danger";
+            }
           }
         }
 
@@ -74,10 +82,11 @@ class Game extends React.Component {
     this.state = {
       input: null,
       isAnswered: false,
-      isCorrect: false
+      isCorrect: false,
+      questionNum: 0
     };
     this.file_json = require("./question01.json");
-    this.question = this.file_json.questions[0];
+    this.question = this.file_json.questions[this.state.questionNum];
   }
 
   changeInput(i) {
@@ -91,11 +100,24 @@ class Game extends React.Component {
       // 答え合わせ
       this.setState({
         isAnswered: true,
-        isCorrect: this.state.input === this.question.answer
+        isCorrect:
+          JSON.stringify(this.state.input) ===
+          JSON.stringify(this.question.answer)
       });
     } else {
       // 次の問題へ
-      this.setState({ input: null, isAnswered: false });
+
+      var questionNum = this.state.questionNum + 1;
+      if (questionNum >= this.file_json.questions.length) {
+        questionNum = 0;
+      }
+
+      this.setState({
+        input: null,
+        isAnswered: false,
+        questionNum: questionNum
+      });
+      this.question = this.file_json.questions[questionNum];
     }
   }
 
@@ -112,6 +134,7 @@ class Game extends React.Component {
           isAnswered={this.state.isAnswered}
           input={this.state.input}
           answer={this.question.answer}
+          type={this.question.type}
         />
 
         <Result
