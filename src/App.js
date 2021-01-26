@@ -90,8 +90,15 @@ class Game extends React.Component {
   }
 
   changeInput(i) {
+    var input = i;
+
+    // 配列はソートする
+    if (Array.isArray(input)) {
+      input.sort();
+    }
+
     this.setState({
-      input: i
+      input: input
     });
   }
 
