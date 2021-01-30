@@ -6,7 +6,9 @@ import {
   ToggleButton,
   Button,
   Alert,
-  Collapse
+  Collapse,
+  InputGroup,
+  FormControl
 } from "react-bootstrap";
 
 function Question(props) {
@@ -14,7 +16,7 @@ function Question(props) {
 }
 
 function Choices(props) {
-  const choiceList = props.value;
+  const choiceList = props.choices;
 
   return (
     <ToggleButtonGroup
@@ -59,6 +61,57 @@ function Choices(props) {
       })}
     </ToggleButtonGroup>
   );
+}
+
+function TextBox(props) {
+  return (
+    <InputGroup className="mb-3">
+      <InputGroup.Prepend>
+        <InputGroup.Text id="inputGroup-sizing-default">回答</InputGroup.Text>
+      </InputGroup.Prepend>
+      <FormControl
+        aria-label="Default"
+        aria-describedby="inputGroup-sizing-default"
+        onChange={(i) => props.onChange(i.target.value)}
+      />
+    </InputGroup>
+  );
+}
+
+function UserInput(props) {
+  var inputEl;
+
+  var choices = props.question.choices;
+  var onChange = props.onChange;
+  var isAnswered = props.state.isAnswered;
+  var input = props.state.input;
+  var answer = props.question.answer;
+  var type = props.question.type;
+
+  if (type === "radio" || type === "checkbox") {
+    inputEl = (
+      <Choices
+        choices={choices}
+        onChange={onChange}
+        isAnswered={isAnswered}
+        input={input}
+        answer={answer}
+        type={type}
+      />
+    );
+  } else if (type === "text") {
+    inputEl = (
+      <TextBox
+        onChange={onChange}
+        isAnswered={isAnswered}
+        input={input}
+        answer={answer}
+        type={type}
+      />
+    );
+  }
+
+  return inputEl;
 }
 
 function Result(props) {
@@ -111,6 +164,7 @@ class Game extends React.Component {
           JSON.stringify(this.state.input) ===
           JSON.stringify(this.question.answer)
       });
+      alert(this.state.input);
     } else {
       // 次の問題へ
 
@@ -135,13 +189,10 @@ class Game extends React.Component {
 
         <Question value={this.question.sentence} />
 
-        <Choices
-          value={this.question.choices}
+        <UserInput
           onChange={(i) => this.changeInput(i)}
-          isAnswered={this.state.isAnswered}
-          input={this.state.input}
-          answer={this.question.answer}
-          type={this.question.type}
+          state={this.state}
+          question={this.question}
         />
 
         <Result
