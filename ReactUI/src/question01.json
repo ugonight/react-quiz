@@ -1,0 +1,24 @@
+{
+    "section": "exsample",
+    "questions": [{
+            "sentence": "1 + 1 = ?",
+            "type": "radio",
+            "choices": ["1", "2", "3"],
+            "answer": 1,
+            "commentary": "1+1=2…常識やから…（笑）"
+        },
+        {
+            "sentence": "次の内、クソなプログラミング言語はどれ？",
+            "type": "checkbox",
+            "choices": ["C++", "Java", "C#", "VB", "JavaScript"],
+            "answer": [1, 3],
+            "commentary": "JavaScriptはクソではなく「ヤバい」"
+        },
+        {
+            "sentence": "精神がつらくなっちゃった件（笑）",
+            "type": "text",
+            "answer": "わら",
+            "commentary": "もう嫌な件（笑）"
+        }
+    ]
+}

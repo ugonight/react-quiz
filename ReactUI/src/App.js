@@ -164,7 +164,6 @@ class Game extends React.Component {
           JSON.stringify(this.state.input) ===
           JSON.stringify(this.question.answer)
       });
-      alert(this.state.input);
     } else {
       // 次の問題へ
 
