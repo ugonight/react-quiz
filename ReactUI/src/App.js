@@ -8,7 +8,9 @@ import {
   Alert,
   Collapse,
   InputGroup,
-  FormControl
+  FormControl,
+  OverlayTrigger,
+  Tooltip
 } from "react-bootstrap";
 
 function Question(props) {
@@ -31,16 +33,41 @@ function Choices(props) {
         var variant = "outline-dark";
         // 回答後ならボタンの色を変える
         if (props.isAnswered) {
+          var correct = false, select = false;
+
+          // 一択
           if (props.type === "radio") {
-            if (idx === props.answer) {
+            correct = (idx === props.answer);
+            select = (idx === props.input);
+
+            // 正解・選択
+            if (correct && select) {
               variant = "success";
-            } else if (idx === props.input) {
+            }
+            // 正解・未選択
+            else if (correct) {
+              variant = "warning";
+            }
+            // 不正解・選択
+            else if (select) {
               variant = "danger";
             }
-          } else if (props.type === "checkbox") {
-            if (props.answer.includes(idx)) {
+          } 
+          // 複数回答
+          else if (props.type === "checkbox") {
+            correct = (props.answer.includes(idx));
+            select = (props.input.includes(idx));
+
+            // 正解・選択
+            if (correct && select) {
               variant = "success";
-            } else if (props.input.includes(idx)) {
+            }
+            // 正解・未選択
+            else if (correct) {
+              variant = "warning";
+            }
+            // 不正解・選択
+            else if (select) {
               variant = "danger";
             }
           }
@@ -64,16 +91,31 @@ function Choices(props) {
 }
 
 function TextBox(props) {
+
   return (
     <InputGroup className="mb-3">
       <InputGroup.Prepend>
         <InputGroup.Text id="inputGroup-sizing-default">回答</InputGroup.Text>
       </InputGroup.Prepend>
-      <FormControl
-        aria-label="Default"
-        aria-describedby="inputGroup-sizing-default"
-        onChange={(i) => props.onChange(i.target.value)}
-      />
+
+      <OverlayTrigger
+        show={props.isAnswered && props.input !== props.answer}
+        placement="bottom-start"
+        overlay={
+          <Tooltip>
+            {props.answer}
+          </Tooltip>
+        }>
+
+        <FormControl
+          aria-label="Default"
+          aria-describedby="inputGroup-sizing-default"
+          onChange={(i) => props.onChange(i.target.value)}
+          readOnly={props.isAnswered}
+        />
+
+      </OverlayTrigger>
+
     </InputGroup>
   );
 }
@@ -123,7 +165,7 @@ function Result(props) {
       <Alert variant={variant} show={props.show} transition={Collapse}>
         <Alert.Heading>{headMsg}</Alert.Heading>
         <hr />
-        <p className="mb-0">{props.commentary}</p>
+        <p className="mb-0">{props.comment}</p>
       </Alert>
     </>
   );
@@ -196,7 +238,7 @@ class Game extends React.Component {
 
         <Result
           isCorrect={this.state.isCorrect}
-          commentary={this.question.commentary}
+          comment={this.question.comment}
           show={this.state.isAnswered}
         />
 
