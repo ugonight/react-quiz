@@ -1,0 +1,100 @@
+import React,{useState} from "react";
+import { Container, Row, Col, Form, Button, Modal } from "react-bootstrap";
+import App from "./App";
+
+var DEF = require("./define");
+
+function Login(props) {
+  const [value, setValue] = useState("");
+
+  return (
+    <>
+      <Modal
+        show={!props.isLogin}
+        onHide={()=>{}}
+        backdrop="static"
+        keyboard={false}
+      >
+        <Modal.Header>
+          <Modal.Title>Login</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Row className="ml-2 mb-3">ログインしろよ（笑）</Row>
+            <Form.Group as={Row} controlId="formPlaintextPassword">
+              <Form.Label column sm="2">
+                Password
+              </Form.Label>
+              <Col sm="10">
+                <Form.Control type="password" placeholder="Password" onChange={(e)=>{setValue(e.target.value)}}/>
+              </Col>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={(e) => props.checkLogin(value)}>OK</Button>
+        </Modal.Footer>
+      </Modal>
+    </>);
+}
+
+class Menu extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { isLogin: false };
+  }
+
+  checkLogin(pass){
+    var res = pass === "wara";
+    this.setState({ isLogin: res });
+  }
+
+  render() {
+    return (
+      <Container>
+        <h1>メニュー</h1>
+
+        <Login isLogin={this.state.isLogin} checkLogin={(i) => this.checkLogin(i)} />
+
+        <Form className="border border-dark rounded">
+          <Form.Group as={Row} controlId="category" mb={3} className="mt-3 mx-3">
+            <Form.Label column sm="2">
+              カテゴリ
+          </Form.Label>
+            <Col sm="10">
+              <Row>
+                <Button variant="outline-primary" size="sm">
+                  すべて切り替え
+              </Button>
+                <div className="col-3">対象問題数: 100</div>
+              </Row>
+              <Row>
+                <Form.Check inline label="chapter1" type="checkbox" id="1" />
+                <Form.Check inline label="chapter2" type="checkbox" id="2" />
+                <Form.Check inline label="chapter3" type="checkbox" id="3" />
+              </Row>
+            </Col>
+          </Form.Group>
+
+          <Form.Group as={Row} controlId="NumberOfQuestions" mb={3} className="mt-3 mx-3">
+            <Form.Label column sm="2">
+              出題数
+          </Form.Label>
+            <Col sm="5">
+              <Form.Control type="number" />
+            </Col>
+          </Form.Group>
+        </Form>
+
+        <Row className="d-grid gap-2 col-6 mx-auto mt-3" mb={3}>
+          <Button variant="primary" size="lg" block onClick={(e) => this.props.changeMode(DEF.APP_MODE.QUIZ)} >
+            開始
+          </Button>
+        </Row>
+
+      </Container>
+    );
+  }
+}
+
+export default Menu;
