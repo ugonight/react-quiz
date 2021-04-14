@@ -9,8 +9,6 @@ import {
   Collapse,
   InputGroup,
   FormControl,
-  OverlayTrigger,
-  Tooltip
 } from "react-bootstrap";
 
 function Question(props) {
@@ -52,7 +50,7 @@ function Choices(props) {
             else if (select) {
               variant = "danger";
             }
-          } 
+          }
           // 複数回答
           else if (props.type === "checkbox") {
             correct = (props.answer.includes(idx));
@@ -91,6 +89,7 @@ function Choices(props) {
 }
 
 function TextBox(props) {
+  var isWrong = props.isAnswered && props.input !== props.answer;
 
   return (
     <InputGroup className="mb-3">
@@ -98,23 +97,17 @@ function TextBox(props) {
         <InputGroup.Text id="inputGroup-sizing-default">回答</InputGroup.Text>
       </InputGroup.Prepend>
 
-      <OverlayTrigger
-        show={props.isAnswered && props.input !== props.answer}
-        placement="bottom-start"
-        overlay={
-          <Tooltip>
-            {props.answer}
-          </Tooltip>
-        }>
-
-        <FormControl
-          aria-label="Default"
-          aria-describedby="inputGroup-sizing-default"
-          onChange={(i) => props.onChange(i.target.value)}
-          readOnly={props.isAnswered}
-        />
-
-      </OverlayTrigger>
+      <FormControl
+        aria-label="Default"
+        aria-describedby="inputGroup-sizing-default"
+        onChange={(i) => props.onChange(i.target.value)}
+        readOnly={props.isAnswered}
+        isInvalid={isWrong}
+        isValid={props.isAnswered && !isWrong}
+      />
+      {isWrong && <FormControl.Feedback type="invalid">
+        {"答え: " + props.answer}
+      </FormControl.Feedback>}
 
     </InputGroup>
   );

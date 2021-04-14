@@ -1,17 +1,19 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Modal } from "react-bootstrap";
-import App from "./App";
+import { instanceOf } from 'prop-types';
+import { withCookies, Cookies } from 'react-cookie';
 
 var DEF = require("./define");
 
 function Login(props) {
   const [value, setValue] = useState("");
+  var isWrong = props.triedLogin && !props.isLogin;
 
   return (
     <>
       <Modal
         show={!props.isLogin}
-        onHide={()=>{}}
+        onHide={() => { }}
         backdrop="static"
         keyboard={false}
       >
@@ -26,7 +28,8 @@ function Login(props) {
                 Password
               </Form.Label>
               <Col sm="10">
-                <Form.Control type="password" placeholder="Password" onChange={(e)=>{setValue(e.target.value)}}/>
+                <Form.Control type="password" placeholder="Password" onChange={(e) => { setValue(e.target.value) }} isInvalid={isWrong} />
+                {isWrong && <Form.Control.Feedback type="invalid">間違っとるよ（笑）</Form.Control.Feedback>}
               </Col>
             </Form.Group>
           </Form>
@@ -39,14 +42,29 @@ function Login(props) {
 }
 
 class Menu extends React.Component {
+  static propTypes = {
+    cookies: instanceOf(Cookies).isRequired
+  };
+
   constructor(props) {
     super(props);
-    this.state = { isLogin: false };
+    const { cookies } = props;
+    this.state = {
+      isLogin: cookies.get('isLogin') || false,
+      triedLogin: false
+    };
   }
 
-  checkLogin(pass){
+  checkLogin(pass) {
+    const { cookies } = this.props;
+
     var res = pass === "wara";
-    this.setState({ isLogin: res });
+    this.setState({
+      isLogin: res,
+      triedLogin: true
+    });
+
+    cookies.set('isLogin', res);
   }
 
   render() {
@@ -54,7 +72,7 @@ class Menu extends React.Component {
       <Container>
         <h1>メニュー</h1>
 
-        <Login isLogin={this.state.isLogin} checkLogin={(i) => this.checkLogin(i)} />
+        <Login isLogin={this.state.isLogin} triedLogin={this.state.triedLogin} checkLogin={(i) => this.checkLogin(i)} />
 
         <Form className="border border-dark rounded">
           <Form.Group as={Row} controlId="category" mb={3} className="mt-3 mx-3">
@@ -63,10 +81,14 @@ class Menu extends React.Component {
           </Form.Label>
             <Col sm="10">
               <Row>
-                <Button variant="outline-primary" size="sm">
-                  すべて切り替え
-              </Button>
-                <div className="col-3">対象問題数: 100</div>
+                <Col>
+                  <Button variant="outline-primary" size="sm">
+                    すべて切り替え
+                  </Button>
+                </Col>
+                <Col>
+                  対象問題数: 100
+                </Col>
               </Row>
               <Row>
                 <Form.Check inline label="chapter1" type="checkbox" id="1" />
@@ -97,4 +119,4 @@ class Menu extends React.Component {
   }
 }
 
-export default Menu;
+export default withCookies(Menu);
