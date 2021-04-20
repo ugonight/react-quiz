@@ -4,6 +4,7 @@ import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 
 var DEF = require("./define");
+var Controller = require("./controller");
 
 function Login(props) {
   const [pass, setPass] = useState("");
@@ -62,10 +63,18 @@ class Menu extends React.Component {
   constructor(props) {
     super(props);
     const { cookies } = props;
+
     this.state = {
       isLogin: cookies.get('isLogin') || false,
-      triedLogin: false
+      triedLogin: false,
+      categories: []
     };
+  }
+
+  componentDidMount() {
+    Controller.getCategoryList().then(data => {
+      this.setState({ categories: data });
+    });
   }
 
   checkLogin(pass, userId) {
@@ -105,9 +114,11 @@ class Menu extends React.Component {
                 </Col>
               </Row>
               <Row>
-                <Form.Check inline label="chapter1" type="checkbox" id="1" />
-                <Form.Check inline label="chapter2" type="checkbox" id="2" />
-                <Form.Check inline label="chapter3" type="checkbox" id="3" />
+                {
+                  this.state.categories.map((category) =>
+                    <Form.Check inline label={category} type="checkbox" id={category} />
+                  )
+                }
               </Row>
             </Col>
           </Form.Group>

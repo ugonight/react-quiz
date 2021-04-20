@@ -2,6 +2,7 @@ var express = require("express");
 var app = express();
 var session = require('express-session');
 const cookieParser = require('cookie-parser');
+const cors = require('cors')
 
 var Manager = require("./manager");
 
@@ -28,16 +29,42 @@ app.use(session({
 // クッキーを読み取れるようにする
 app.use(cookieParser());
 
+app.use(cors());
+
 app.get("/Rest", function(req, res, next) {
     // res.json(req.session);
     res.json(req.cookies);
 });
 
-app.get("/Start", function(req, res, next) {
+/**
+ * 情報取得処理
+ */
+
+// カテゴリリスト
+app.get("/Menu/Categories", function(req, res, next) {
+    (async() => {
+        var categoryList = await Manager.getCategoryList();
+        res.json(categoryList);
+    })().catch(next);
+});
+
+// レーティングリスト
+app.get("/Menu/Ratings", function(req, res, next) {
 
 });
 
-app.get("/Next", function(req, res, next) {
+
+/**
+ * 出題処理
+ */
+
+// クイズスタート
+app.get("/Quiz/Start", function(req, res, next) {
+
+});
+
+// 次の問題
+app.get("/Quiz/Next", function(req, res, next) {
 
 });
 

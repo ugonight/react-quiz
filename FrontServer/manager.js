@@ -12,3 +12,10 @@ exports.init = function() {
 exports.close = function() {
     client.close();
 };
+
+exports.getCategoryList = function() {
+    return new Promise(function(callback) {
+        var categoryList = client.db("react_quiz").collection("questions").distinct("category");
+        callback(categoryList);
+    });
+}
