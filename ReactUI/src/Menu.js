@@ -67,13 +67,20 @@ class Menu extends React.Component {
     this.state = {
       isLogin: cookies.get('isLogin') || false,
       triedLogin: false,
-      categories: []
+      categories: [],
+      selectCategories: [],
+      ratings: [],
+      selectRatings: []
     };
   }
 
   componentDidMount() {
     Controller.getCategoryList().then(data => {
       this.setState({ categories: data });
+    });
+
+    Controller.getRatingList().then(data => {
+      this.setState({ ratings: data });
     });
   }
 
@@ -90,6 +97,54 @@ class Menu extends React.Component {
     if (res) cookies.set('userId', userId);
   }
 
+  categoryChange(id) {
+    var selectCategories = this.state.selectCategories;
+
+    if (selectCategories.includes(id)) {
+      selectCategories = selectCategories.filter(n => n !== id).sort();
+    } else {
+      selectCategories.push(id);
+    }
+
+    this.setState({ selectCategories: selectCategories });
+  }
+
+  categoryChangeAll() {
+    var selectCategories = this.state.selectCategories;
+
+    if (selectCategories.length === this.state.categories.length) {
+      selectCategories = [];
+    } else {
+      selectCategories = this.state.categories.concat();
+    }
+
+    this.setState({ selectCategories: selectCategories });
+  }
+
+  ratingChange(id) {
+    var selectRatings = this.state.selectRatings;
+
+    if (selectRatings.includes(Number(id))) {
+      selectRatings = selectRatings.filter(n => n !== Number(id)).sort();
+    } else {
+      selectRatings.push(Number(id));
+    }
+
+    this.setState({ selectRatings: selectRatings });
+  }
+
+  ratingChangeAll() {
+    var selectRatings = this.state.selectRatings;
+
+    if (selectRatings.length === this.state.ratings.length) {
+      selectRatings = [];
+    } else {
+      selectRatings = this.state.ratings.concat();
+    }
+
+    this.setState({ selectRatings: selectRatings });
+  }
+
   render() {
     return (
       <Container>
@@ -97,26 +152,43 @@ class Menu extends React.Component {
 
         <Login isLogin={this.state.isLogin} triedLogin={this.state.triedLogin} checkLogin={(pass, name) => this.checkLogin(pass, name)} />
 
+        {/* カテゴリ */}
         <Form className="border border-dark rounded">
           <Form.Group as={Row} controlId="category" mb={3} className="mt-3 mx-3">
-            <Form.Label column sm="2">
+            <Form.Label column sm={3}>
               カテゴリ
-          </Form.Label>
+            </Form.Label>
+            <Col>
+              <Button variant="outline-primary" size="sm" onClick={e => this.categoryChangeAll()}>
+                すべて切り替え
+              </Button>
+            </Col>
             <Col sm="10">
-              <Row>
-                <Col>
-                  <Button variant="outline-primary" size="sm">
-                    すべて切り替え
-                  </Button>
-                </Col>
-                <Col>
-                  対象問題数: 100
-                </Col>
-              </Row>
               <Row>
                 {
                   this.state.categories.map((category) =>
-                    <Form.Check inline label={category} type="checkbox" id={category} />
+                    <Form.Check inline label={category} type="checkbox" id={category} onChange={(e) => this.categoryChange(e.target.id)} checked={this.state.selectCategories.includes(category)} />
+                  )
+                }
+              </Row>
+            </Col>
+          </Form.Group>
+
+          {/* レーティング */}
+          <Form.Group as={Row} controlId="rating" mb={3} className="mt-3 mx-3">
+            <Form.Label column sm={3}>
+              レーティング
+              </Form.Label>
+              <Col>
+                <Button variant="outline-primary" size="sm" onClick={e => this.ratingChangeAll()}>
+                  すべて切り替え
+                </Button>
+              </Col>
+            <Col sm="10">
+              <Row>
+                {
+                  this.state.ratings.map((rating) =>
+                    <Form.Check inline label={"☆".repeat(rating)} type="checkbox" id={rating} onChange={(e) => this.ratingChange(e.target.id)} checked={this.state.selectRatings.includes(rating)} />
                   )
                 }
               </Row>

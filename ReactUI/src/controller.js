@@ -18,3 +18,15 @@ exports.getCategoryList = function() {
             });
     });
 }
+
+exports.getRatingList = function() {
+    return new Promise(function(callback) {
+        axios.get('/Menu/Ratings')
+            .then(function(response) {
+                callback(response.data);
+            })
+            .catch(function(error) {
+                console.error("REST ERROR from /Menu/Ratings");
+            });
+    });
+}

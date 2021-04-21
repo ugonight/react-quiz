@@ -2,7 +2,8 @@ var express = require("express");
 var app = express();
 var session = require('express-session');
 const cookieParser = require('cookie-parser');
-const cors = require('cors')
+const cors = require('cors');
+require('dotenv').config();
 
 var Manager = require("./manager");
 
@@ -50,7 +51,10 @@ app.get("/Menu/Categories", function(req, res, next) {
 
 // レーティングリスト
 app.get("/Menu/Ratings", function(req, res, next) {
-
+    (async() => {
+        var ratingList = await Manager.getRatingList();
+        res.json(ratingList);
+    })().catch(next);
 });
 
 
