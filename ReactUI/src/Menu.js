@@ -65,13 +65,22 @@ class Menu extends React.Component {
     const { cookies } = props;
 
     this.state = {
+      // ログインしているか
       isLogin: cookies.get('isLogin') || false,
+      // 一度ログインOKボタンが押されたか
       triedLogin: false,
+      // 全カテゴリリスト
       categories: [],
+      // 選択カテゴリリスト
       selectCategories: [],
+      // 全レーティングリスト
       ratings: [],
+      // 選択レーティングリスト
       selectRatings: [],
-      count: 0
+      // 対象問題数
+      targetCount: 0,
+      // 出題数
+      quesNumber: 0
     };
   }
 
@@ -88,7 +97,7 @@ class Menu extends React.Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (JSON.stringify(this.state.selectCategories) !== JSON.stringify(prevState.selectCategories) || JSON.stringify(this.state.selectRatings) !== JSON.stringify(prevState.selectRatings)) {
       Controller.getQuizCount(this.state.selectCategories, this.state.selectRatings).then(data => {
-        this.setState({ count: data });
+        this.setState({ targetCount: data, quesNumber: data });
       });
     }
   }
@@ -209,10 +218,10 @@ class Menu extends React.Component {
           <Form.Group as={Row} controlId="NumberOfQuestions" mb={3} className="mt-3 mx-3">
             <Form.Label column sm="2">
               出題数 <br />
-              (対象問題数: {this.state.count})
+              (対象問題数: {this.state.targetCount})
             </Form.Label>
             <Col sm="5">
-              <Form.Control type="number" />
+              <Form.Control type="number" max={this.state.targetCount} min={0} step={10} value={this.state.quesNumber} onChange={(e) => this.setState({ quesNumber: Number(e.target.value) })} />
             </Col>
           </Form.Group>
         </Form>
