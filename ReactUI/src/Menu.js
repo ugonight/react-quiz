@@ -70,18 +70,27 @@ class Menu extends React.Component {
       categories: [],
       selectCategories: [],
       ratings: [],
-      selectRatings: []
+      selectRatings: [],
+      count: 0
     };
   }
 
   componentDidMount() {
     Controller.getCategoryList().then(data => {
-      this.setState({ categories: data });
+      this.setState({ categories: data, selectCategories: data });
     });
 
     Controller.getRatingList().then(data => {
-      this.setState({ ratings: data });
+      this.setState({ ratings: data, selectRatings: data });
     });
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (JSON.stringify(this.state.selectCategories) !== JSON.stringify(prevState.selectCategories) || JSON.stringify(this.state.selectRatings) !== JSON.stringify(prevState.selectRatings)) {
+      Controller.getQuizCount(this.state.selectCategories, this.state.selectRatings).then(data => {
+        this.setState({ count: data });
+      });
+    }
   }
 
   checkLogin(pass, userId) {
@@ -103,6 +112,7 @@ class Menu extends React.Component {
     if (selectCategories.includes(id)) {
       selectCategories = selectCategories.filter(n => n !== id).sort();
     } else {
+      selectCategories = selectCategories.concat(); // 変更差分が検知できないのでコピーする
       selectCategories.push(id);
     }
 
@@ -127,6 +137,7 @@ class Menu extends React.Component {
     if (selectRatings.includes(Number(id))) {
       selectRatings = selectRatings.filter(n => n !== Number(id)).sort();
     } else {
+      selectRatings = selectRatings.concat();
       selectRatings.push(Number(id));
     }
 
@@ -179,11 +190,11 @@ class Menu extends React.Component {
             <Form.Label column sm={3}>
               レーティング
               </Form.Label>
-              <Col>
-                <Button variant="outline-primary" size="sm" onClick={e => this.ratingChangeAll()}>
-                  すべて切り替え
+            <Col>
+              <Button variant="outline-primary" size="sm" onClick={e => this.ratingChangeAll()}>
+                すべて切り替え
                 </Button>
-              </Col>
+            </Col>
             <Col sm="10">
               <Row>
                 {
@@ -197,8 +208,9 @@ class Menu extends React.Component {
 
           <Form.Group as={Row} controlId="NumberOfQuestions" mb={3} className="mt-3 mx-3">
             <Form.Label column sm="2">
-              出題数
-          </Form.Label>
+              出題数 <br />
+              (対象問題数: {this.state.count})
+            </Form.Label>
             <Col sm="5">
               <Form.Control type="number" />
             </Col>

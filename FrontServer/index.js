@@ -32,6 +32,10 @@ app.use(cookieParser());
 
 app.use(cors());
 
+// Parsers for POST data
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: false, limit: '20mb' }));
+
 app.get("/Rest", function(req, res, next) {
     // res.json(req.session);
     res.json(req.cookies);
@@ -54,6 +58,14 @@ app.get("/Menu/Ratings", function(req, res, next) {
     (async() => {
         var ratingList = await Manager.getRatingList();
         res.json(ratingList);
+    })().catch(next);
+});
+
+// 問題数
+app.post("/Menu/QuizCount", function(req, res, next) {
+    (async() => {
+        var count = await Manager.getQuizCount(req.body.categoryList, req.body.ratingList);
+        res.json(count);
     })().catch(next);
 });
 

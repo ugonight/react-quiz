@@ -30,3 +30,16 @@ exports.getRatingList = function() {
             });
     });
 }
+
+exports.getQuizCount = function(categoryList, ratingList) {
+    return new Promise(function(callback) {
+        // console.log(categoryList);
+        axios.post('/Menu/QuizCount', { categoryList: categoryList, ratingList: ratingList })
+            .then(function(response) {
+                callback(response.data);
+            })
+            .catch(function(error) {
+                console.error("REST ERROR from /Menu/QuizCount\n" + error);
+            });
+    });
+}

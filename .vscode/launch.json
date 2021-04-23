@@ -11,7 +11,9 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\FrontServer\\index.js"
+            "program": "${workspaceFolder}\\FrontServer\\index.js",
+            "envFile": "${workspaceFolder}\\FrontServer\\.env",
+            
         }
     ]
 }
