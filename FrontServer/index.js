@@ -75,13 +75,27 @@ app.post("/Menu/QuizCount", function(req, res, next) {
  */
 
 // クイズスタート
-app.get("/Quiz/Start", function(req, res, next) {
-
+app.post("/Quiz/Start", function(req, res, next) {
+    (async() => {
+        var count = await Manager.startQuiz(req.cookies.userId, req.body.categoryList, req.body.ratingList, req.body.quesNumber);
+        res.json(count);
+    })().catch(next);
 });
 
-// 次の問題
-app.get("/Quiz/Next", function(req, res, next) {
+// 現在の問題を取得
+app.post("/Quiz/Get", function(req, res, next) {
+    (async() => {
+        var ques = await Manager.getCurrentQuestion(req.cookies.userId);
+        res.json(ques);
+    })().catch(next);
+});
 
+// 問題の結果を反映
+app.post("/Quiz/SetResult", function(req, res, next) {
+    (async() => {
+        var result = await Manager.applyResult(req.cookies.userId, req.body.result);
+        res.json(result);
+    })().catch(next);
 });
 
 // 終了処理

@@ -11,8 +11,30 @@ import {
   FormControl,
 } from "react-bootstrap";
 
+import ReactMarkdown from 'react-markdown'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
+const gfm = require('remark-gfm');
+
+var DEF = require("./define");
+var Controller = require("./controller");
+
+const md_components = {
+  code({ node, className, ...props }) {
+    const match = /language-(\w+)/.exec(className || '')
+    return match
+      ? <SyntaxHighlighter language={match[1]} PreTag="div" style={vs} {...props} />
+      : <code className={className} {...props} />
+  }
+}
+
 function Question(props) {
-  return <div className="question">{props.value}</div>;
+  return (
+    <div className="question">
+      <ReactMarkdown remarkPlugins={[gfm]} components={md_components} className="line-break">
+        {props.value}
+      </ReactMarkdown>
+    </div>);
 }
 
 function Choices(props) {
@@ -114,7 +136,7 @@ function TextBox(props) {
 }
 
 function UserInput(props) {
-  var inputEl;
+  var inputEl = <div />;
 
   var choices = props.question.choices;
   var onChange = props.onChange;
@@ -158,7 +180,11 @@ function Result(props) {
       <Alert variant={variant} show={props.show} transition={Collapse}>
         <Alert.Heading>{headMsg}</Alert.Heading>
         <hr />
-        <p className="mb-0">{props.comment}</p>
+        <p className="mb-0">
+          <ReactMarkdown remarkPlugins={[gfm]} components={md_components} className="line-break">
+            {props.comment}
+          </ReactMarkdown>
+        </p>
       </Alert>
     </>
   );
@@ -171,10 +197,23 @@ class Game extends React.Component {
       input: null,
       isAnswered: false,
       isCorrect: false,
-      questionNum: 0
+      quesNumber: 0,
+      question: {
+        "sentence": "",
+        "type": "",
+        "choices": "",
+        "answer": 0,
+        "comment": ""
+      },
+      // クイズ読み込み中
+      loadingQuiz: false
     };
-    this.file_json = require("./question01.json");
-    this.question = this.file_json.questions[this.state.questionNum];
+  }
+
+  componentDidMount() {
+    Controller.getCurrentQuestion().then(data => {
+      this.setState({ question: data.question, quesNumber: data.quesNumber });
+    });
   }
 
   changeInput(i) {
@@ -197,41 +236,41 @@ class Game extends React.Component {
         isAnswered: true,
         isCorrect:
           JSON.stringify(this.state.input) ===
-          JSON.stringify(this.question.answer)
+          JSON.stringify(this.state.question.answer)
       });
     } else {
       // 次の問題へ
-
-      var questionNum = this.state.questionNum + 1;
-      if (questionNum >= this.file_json.questions.length) {
-        questionNum = 0;
-      }
-
-      this.setState({
-        input: null,
-        isAnswered: false,
-        questionNum: questionNum
+      this.setState({ loadingQuiz: true });
+      Controller.applyResult(this.state.isCorrect).then(data => {
+        Controller.getCurrentQuestion().then(data => {
+          this.setState({
+            question: data.question,
+            quesNumber: data.quesNumber,
+            input: null,
+            isAnswered: false,
+            loadingQuiz: false
+          });
+        });
       });
-      this.question = this.file_json.questions[questionNum];
     }
   }
 
   render() {
     return (
       <>
-        <h1 className="header">{this.file_json.section}</h1>
+        <h1 className="header">{this.state.quesNumber + 1}問目</h1>
 
-        <Question value={this.question.sentence} />
+        <Question value={this.state.question.sentence} />
 
         <UserInput
           onChange={(i) => this.changeInput(i)}
           state={this.state}
-          question={this.question}
+          question={this.state.question}
         />
 
         <Result
           isCorrect={this.state.isCorrect}
-          comment={this.question.comment}
+          comment={this.state.question.comment}
           show={this.state.isAnswered}
         />
 
@@ -241,9 +280,9 @@ class Game extends React.Component {
           block
           className="mt-4"
           onClick={(i) => this.clickOK(i)}
-          disabled={this.state.input == null}
+          disabled={this.state.input == null || this.state.loadingQuiz}
         >
-          {this.state.isAnswered ? "次へ" : "決定"}
+          {this.state.isAnswered ? ( this.state.loadingQuiz ? "読み込み中…" : "次へ") : "決定"}
         </Button>
       </>
     );

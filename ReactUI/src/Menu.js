@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Modal } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Modal, Spinner } from "react-bootstrap";
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
+import { BsPower } from 'react-icons/bs';
 
 var DEF = require("./define");
 var Controller = require("./controller");
@@ -66,7 +67,7 @@ class Menu extends React.Component {
 
     this.state = {
       // ログインしているか
-      isLogin: cookies.get('isLogin') || false,
+      isLogin: JSON.parse(cookies.get('isLogin')) || false,
       // 一度ログインOKボタンが押されたか
       triedLogin: false,
       // 全カテゴリリスト
@@ -80,7 +81,9 @@ class Menu extends React.Component {
       // 対象問題数
       targetCount: 0,
       // 出題数
-      quesNumber: 0
+      quesNumber: 0,
+      // クイズ読み込み中
+      loadingQuiz: false
     };
   }
 
@@ -113,6 +116,16 @@ class Menu extends React.Component {
 
     cookies.set('isLogin', res);
     if (res) cookies.set('userId', userId);
+  }
+
+  logout() {
+    const { cookies } = this.props;
+    this.setState({
+      isLogin: false,
+      triedLogin: false
+    });
+    cookies.set('isLogin', false);
+    cookies.set('userId', '');
   }
 
   categoryChange(id) {
@@ -165,10 +178,34 @@ class Menu extends React.Component {
     this.setState({ selectRatings: selectRatings });
   }
 
+  startQuiz() {
+    this.setState({ loadingQuiz: true });
+    Controller.startQuiz(this.state.selectCategories, this.state.selectRatings, this.state.quesNumber).then(data => {
+      this.setState({ loadingQuiz: false });
+      this.props.changeMode(DEF.APP_MODE.QUIZ);
+    });
+  }
+
   render() {
+    const { cookies } = this.props;
+
+    var startButtontext;
+    if (this.state.loadingQuiz) {
+      startButtontext = <div><Spinner
+        as="span"
+        animation="grow"
+        size="sm"
+        role="status"
+        aria-hidden="true"
+      />
+      読み込み中</div>;
+    } else {
+      startButtontext = <div>開始</div>;
+    }
+
     return (
       <Container>
-        <h1>メニュー</h1>
+        <h1>メニュー</h1> ユーザー名: {cookies.get('userId')} <Button variant="link" onClick={(e) => this.logout()}>{' '}<BsPower />ログアウト</Button>
 
         <Login isLogin={this.state.isLogin} triedLogin={this.state.triedLogin} checkLogin={(pass, name) => this.checkLogin(pass, name)} />
 
@@ -227,8 +264,8 @@ class Menu extends React.Component {
         </Form>
 
         <Row className="d-grid gap-2 col-6 mx-auto mt-3" mb={3}>
-          <Button variant="primary" size="lg" block onClick={(e) => this.props.changeMode(DEF.APP_MODE.QUIZ)} >
-            開始
+          <Button variant="primary" size="lg" block onClick={(e) => this.startQuiz()} disabled={this.state.quesNumber <= 0}>
+            {startButtontext}
           </Button>
         </Row>
 

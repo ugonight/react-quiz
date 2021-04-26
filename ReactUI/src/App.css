@@ -3,7 +3,7 @@
     display: -webkit-flex;
     display: flex;
     width: 100%;
-    height: 20vh;
+    height: 20vh auto;
     margin: 5px auto;
 }
 
@@ -16,4 +16,24 @@
 
 .choice {
     width: inherit;
+}
+
+.line-break {
+    white-space: normal;
+    overflow: auto;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 4px 0;
+}
+
+table th,
+table td {
+    padding: 4px;
+    border: 1px solid #888;
+}
+
+table th {
+    background-color: #ddd;
 }
