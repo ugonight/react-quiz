@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Modal, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Modal, Spinner, ThemeProvider } from "react-bootstrap";
 import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
 import { BsPower } from 'react-icons/bs';
@@ -65,9 +65,18 @@ class Menu extends React.Component {
     super(props);
     const { cookies } = props;
 
+    var isLogin = cookies.get('isLogin');
+    if (isLogin === "false") {
+      isLogin = false;
+    } else if (isLogin === "true") {
+      isLogin = true;
+    } else {
+      isLogin = false;
+    }
+
     this.state = {
       // ログインしているか
-      isLogin: JSON.parse(cookies.get('isLogin')) || false,
+      isLogin: isLogin,
       // 一度ログインOKボタンが押されたか
       triedLogin: false,
       // 全カテゴリリスト
@@ -83,7 +92,11 @@ class Menu extends React.Component {
       // 出題数
       quesNumber: 0,
       // クイズ読み込み中
-      loadingQuiz: false
+      loadingQuiz: false,
+      // 途中データ進捗
+      progressNumber: 0,
+      // 途中データ問題数
+      progressCount: 0,
     };
   }
 
@@ -94,6 +107,10 @@ class Menu extends React.Component {
 
     Controller.getRatingList().then(data => {
       this.setState({ ratings: data, selectRatings: data });
+    });
+
+    Controller.getProgress().then(data => {
+      this.setState({ progressNumber: data.number, progressCount: data.count });
     });
   }
 
@@ -186,6 +203,10 @@ class Menu extends React.Component {
     });
   }
 
+  restartQuiz() {
+    this.props.changeMode(DEF.APP_MODE.QUIZ);
+  }
+
   render() {
     const { cookies } = this.props;
 
@@ -269,6 +290,14 @@ class Menu extends React.Component {
           </Button>
         </Row>
 
+        <hr />
+
+        {
+          this.state.progressNumber > 0 &&
+          <Button variant="info" size="lg" block onClick={(e) => this.restartQuiz()} >
+            再開({this.state.progressNumber}/{this.state.progressCount})
+          </Button>
+        }
       </Container>
     );
   }

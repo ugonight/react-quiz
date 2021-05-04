@@ -44,6 +44,19 @@ exports.getQuizCount = function(categoryList, ratingList) {
     });
 }
 
+exports.getProgress = function() {
+    return new Promise(function(callback) {
+        // console.log(categoryList);
+        axios.post('/Menu/Progress')
+            .then(function(response) {
+                callback(response.data);
+            })
+            .catch(function(error) {
+                console.error("REST ERROR from /Menu/Progress\n" + error);
+            });
+    });
+}
+
 exports.startQuiz = function(categoryList, ratingList, quesNumber) {
     return new Promise(function(callback) {
         // console.log(categoryList);

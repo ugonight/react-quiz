@@ -69,6 +69,14 @@ app.post("/Menu/QuizCount", function(req, res, next) {
     })().catch(next);
 });
 
+// 途中データ
+app.post("/Menu/Progress", function(req, res, next) {
+    (async() => {
+        var result = await Manager.getProgress(req.cookies.userId);
+        res.json(result);
+    })().catch(next);
+});
+
 
 /**
  * 出題処理
