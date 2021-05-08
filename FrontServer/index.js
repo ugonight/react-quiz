@@ -70,7 +70,7 @@ app.post("/Menu/QuizCount", function(req, res, next) {
 });
 
 // 途中データ
-app.post("/Menu/Progress", function(req, res, next) {
+app.get("/Menu/Progress", function(req, res, next) {
     (async() => {
         var result = await Manager.getProgress(req.cookies.userId);
         res.json(result);
@@ -105,6 +105,23 @@ app.post("/Quiz/SetResult", function(req, res, next) {
         res.json(result);
     })().catch(next);
 });
+
+// 最終成績を取得
+app.get("/Quiz/GetRecord", function(req, res, next) {
+    (async() => {
+        var record = await Manager.getRecord(req.cookies.userId);
+        res.json(record);
+    })().catch(next);
+});
+
+// 途中データを削除
+app.post("/Quiz/Reset", function(req, res, next) {
+    (async() => {
+        var result = await Manager.resetQuiz(req.cookies.userId);
+        res.json(result);
+    })().catch(next);
+});
+
 
 // 終了処理
 process.on('exit', function() {

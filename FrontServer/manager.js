@@ -99,7 +99,11 @@ exports.getCurrentQuestion = function(userId) {
         var quesSet = await db.collection("manage").findOne({ userId: userId });
         var questions = quesSet.questions;
         var number = quesSet.quesNumber;
-        callback({ question: questions[number], quesNumber: number });
+        var question = null;
+        if (number < questions.length) {
+            question = questions[number];
+        }
+        callback({ question: question, quesNumber: number, isEnd: number >= questions.length });
     });
 }
 
@@ -112,5 +116,25 @@ exports.applyResult = function(userId, result) {
         quesSet.results.push(result);
         await db.collection("manage").updateOne({ userId: userId }, [{ $set: { quesNumber: quesSet.quesNumber, results: quesSet.results } }]);
         callback(true);
+    });
+}
+
+// 最終成績を取得
+exports.getRecord = function(userId) {
+    return new Promise(async function(callback) {
+        // var quesSet = g_managingQuestions.get(userId);
+        var quesSet = await db.collection("manage").findOne({ userId: userId });
+        var correctNum = quesSet.results.filter(e => e === true).length;
+        var wrongNum = quesSet.results.filter(e => e === false).length;
+
+        callback({ correctNum: correctNum, wrongNum: wrongNum, correctPer: correctNum / quesSet.questions.length * 100 });
+    });
+}
+
+// 途中データを削除
+exports.resetQuiz = function(userId) {
+    return new Promise(async function(callback) {
+        var res = await db.collection("manage").deleteOne({ userId: userId });
+        callback(res.deletedCount);
     });
 }

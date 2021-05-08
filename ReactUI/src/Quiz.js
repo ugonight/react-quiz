@@ -190,7 +190,7 @@ function Result(props) {
   );
 }
 
-class Game extends React.Component {
+class Quiz extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -203,7 +203,9 @@ class Game extends React.Component {
         "type": "",
         "choices": "",
         "answer": 0,
-        "comment": ""
+        "comment": "",
+        "rating": 0,
+        "category": ""
       },
       // クイズ読み込み中
       loadingQuiz: false
@@ -212,7 +214,11 @@ class Game extends React.Component {
 
   componentDidMount() {
     Controller.getCurrentQuestion().then(data => {
-      this.setState({ question: data.question, quesNumber: data.quesNumber });
+      if (data.isEnd) {
+        this.changeModeToResult();
+      } else {
+        this.setState({ question: data.question, quesNumber: data.quesNumber });
+      }
     });
   }
 
@@ -229,6 +235,10 @@ class Game extends React.Component {
     });
   }
 
+  changeModeToResult() {
+    this.props.changeMode(DEF.APP_MODE.RESULT);
+  }
+
   clickOK(e) {
     if (!this.state.isAnswered) {
       // 答え合わせ
@@ -241,15 +251,21 @@ class Game extends React.Component {
     } else {
       // 次の問題へ
       this.setState({ loadingQuiz: true });
+
       Controller.applyResult(this.state.isCorrect).then(data => {
         Controller.getCurrentQuestion().then(data => {
-          this.setState({
-            question: data.question,
-            quesNumber: data.quesNumber,
-            input: null,
-            isAnswered: false,
-            loadingQuiz: false
-          });
+          if (data.isEnd) {
+            this.setState({ loadingQuiz: false });
+            this.changeModeToResult();
+          } else {
+            this.setState({
+              question: data.question,
+              quesNumber: data.quesNumber,
+              input: null,
+              isAnswered: false,
+              loadingQuiz: false
+            });
+          }
         });
       });
     }
@@ -257,8 +273,9 @@ class Game extends React.Component {
 
   render() {
     return (
-      <>
+      <Container>
         <h1 className="header">{this.state.quesNumber + 1}問目</h1>
+        <h6>カテゴリ:{this.state.question.category} レーティング:{"☆".repeat(this.state.question.rating)}</h6>
 
         <Question value={this.state.question.sentence} />
 
@@ -282,19 +299,11 @@ class Game extends React.Component {
           onClick={(i) => this.clickOK(i)}
           disabled={this.state.input == null || this.state.loadingQuiz}
         >
-          {this.state.isAnswered ? ( this.state.loadingQuiz ? "読み込み中…" : "次へ") : "決定"}
+          {this.state.isAnswered ? (this.state.loadingQuiz ? "読み込み中…" : "次へ") : "決定"}
         </Button>
-      </>
+      </Container>
     );
   }
-}
-
-function Quiz() {
-  return (
-    <Container>
-      <Game />
-    </Container>
-  );
 }
 
 export default Quiz;

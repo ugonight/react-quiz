@@ -47,7 +47,7 @@ exports.getQuizCount = function(categoryList, ratingList) {
 exports.getProgress = function() {
     return new Promise(function(callback) {
         // console.log(categoryList);
-        axios.post('/Menu/Progress')
+        axios.get('/Menu/Progress')
             .then(function(response) {
                 callback(response.data);
             })
@@ -91,6 +91,30 @@ exports.applyResult = function(result) {
             })
             .catch(function(error) {
                 console.error("REST ERROR from /Quiz/Get\n" + error);
+            });
+    });
+}
+
+exports.getRecord = function() {
+    return new Promise(function(callback) {
+        axios.get('/Quiz/GetRecord')
+            .then(function(response) {
+                callback(response.data);
+            })
+            .catch(function(error) {
+                console.error("REST ERROR from /Quiz/GetRecord\n" + error);
+            });
+    });
+}
+
+exports.resetQuiz = function() {
+    return new Promise(function(callback) {
+        axios.post('/Quiz/Reset')
+            .then(function(response) {
+                callback(response.data);
+            })
+            .catch(function(error) {
+                console.error("REST ERROR from /Quiz/Reset\n" + error);
             });
     });
 }

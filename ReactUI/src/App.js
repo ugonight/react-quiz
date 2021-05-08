@@ -4,6 +4,7 @@ import posed from "react-pose";
 
 import Menu from "./Menu";
 import Quiz from "./Quiz";
+import Result from "./Result";
 
 var DEF = require("./define");
 
@@ -38,6 +39,7 @@ class App extends React.Component {
     this.MODE_ELEMENTS = new Map();
     this.MODE_ELEMENTS.set(DEF.APP_MODE.MENU, <Menu {...att} />);
     this.MODE_ELEMENTS.set(DEF.APP_MODE.QUIZ, <Quiz {...att} />);
+    this.MODE_ELEMENTS.set(DEF.APP_MODE.RESULT, <Result {...att} />);
 
     // 最初はメニュー画面
     this.state = {
